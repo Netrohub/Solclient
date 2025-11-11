@@ -14,22 +14,33 @@ export default function GuildDashboard({ user }: { user: any }) {
     if (!guildId) return;
 
     // Fetch stats
-    axios.get(`/api/guild/${guildId}/stats`).then((res) => setStats(res.data));
+    axios.get(`/api/guild/${guildId}/stats`)
+      .then((res) => setStats(res.data))
+      .catch((err) => console.error('Failed to fetch stats:', err));
 
     // Fetch activity
-    axios.get(`/api/guild/${guildId}/activity?days=7`).then((res) => {
-      const formatted = res.data.map((d: any) => ({
-        date: new Date(d.date).toLocaleDateString(),
-        messages: d._sum.messages || 0,
-        images: d._sum.images || 0,
-      }));
-      setActivity(formatted);
-    });
+    axios.get(`/api/guild/${guildId}/activity?days=7`)
+      .then((res) => {
+        const data = Array.isArray(res.data) ? res.data : [];
+        const formatted = data.map((d: any) => ({
+          date: new Date(d.date).toLocaleDateString(),
+          messages: d._sum.messages || 0,
+          images: d._sum.images || 0,
+        }));
+        setActivity(formatted);
+      })
+      .catch((err) => {
+        console.error('Failed to fetch activity:', err);
+        setActivity([]);
+      });
 
     // Fetch leaderboard
-    axios.get(`/api/guild/${guildId}/leaderboard?metric=points&limit=5`).then((res) => {
-      setLeaderboard(res.data);
-    });
+    axios.get(`/api/guild/${guildId}/leaderboard?metric=points&limit=5`)
+      .then((res) => setLeaderboard(Array.isArray(res.data) ? res.data : []))
+      .catch((err) => {
+        console.error('Failed to fetch leaderboard:', err);
+        setLeaderboard([]);
+      });
   }, [guildId]);
 
   return (

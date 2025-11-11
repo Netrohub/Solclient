@@ -13,7 +13,11 @@ export default function Leaderboard({ user }: { user: any }) {
     
     axios
       .get(`/api/guild/${guildId}/leaderboard?metric=${metric}&limit=50`)
-      .then((res) => setLeaderboard(res.data));
+      .then((res) => setLeaderboard(Array.isArray(res.data) ? res.data : []))
+      .catch((err) => {
+        console.error('Failed to fetch leaderboard:', err);
+        setLeaderboard([]);
+      });
   }, [guildId, metric]);
 
   return (

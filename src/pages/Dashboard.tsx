@@ -7,7 +7,12 @@ export default function Dashboard({ user }: { user: any }) {
   const [guilds, setGuilds] = useState<any[]>([]);
 
   useEffect(() => {
-    axios.get('/api/guilds').then((res) => setGuilds(res.data));
+    axios.get('/api/guilds')
+      .then((res) => setGuilds(Array.isArray(res.data) ? res.data : []))
+      .catch((err) => {
+        console.error('Failed to fetch guilds:', err);
+        setGuilds([]);
+      });
   }, []);
 
   return (
