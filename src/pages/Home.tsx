@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Bot, BarChart3, Trophy, Zap, Shield, Users } from 'lucide-react';
+import { API_URL } from '../App';
 
 export default function Home({ user }: { user: any }) {
   return (
@@ -21,7 +22,7 @@ export default function Home({ user }: { user: any }) {
               </Link>
             ) : (
               <a
-                href={`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/auth/discord`}
+                href={`${API_URL}/auth/discord`}
                 className="px-6 py-2 bg-discord-blurple hover:bg-discord-blurple/80 rounded-lg font-semibold transition-colors"
               >
                 Login with Discord
@@ -41,7 +42,7 @@ export default function Home({ user }: { user: any }) {
         </p>
         <div className="flex justify-center space-x-4">
           <a
-            href={`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/auth/discord`}
+            href={`${API_URL}/auth/discord`}
             className="px-8 py-4 bg-discord-blurple hover:bg-discord-blurple/80 rounded-lg text-lg font-semibold transition-colors"
           >
             Get Started
@@ -101,7 +102,7 @@ export default function Home({ user }: { user: any }) {
               Join thousands of servers using Server Manager Bot
             </p>
             <a
-              href={`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/auth/discord`}
+              href={`${API_URL}/auth/discord`}
               className="inline-block px-10 py-4 bg-discord-blurple hover:bg-discord-blurple/80 rounded-lg text-lg font-semibold transition-colors"
             >
               Add to Discord

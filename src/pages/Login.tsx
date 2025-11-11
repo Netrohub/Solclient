@@ -1,4 +1,5 @@
 import { Bot } from 'lucide-react';
+import { API_URL } from '../App';
 
 export default function Login() {
   return (
@@ -12,7 +13,7 @@ export default function Login() {
           Login with Discord to access your dashboard
         </p>
         <a
-          href={`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/auth/discord`}
+          href={`${API_URL}/auth/discord`}
           className="block w-full py-4 bg-discord-blurple hover:bg-discord-blurple/80 rounded-lg text-center font-semibold transition-colors"
         >
           Login with Discord

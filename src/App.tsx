@@ -7,8 +7,20 @@ import GuildDashboard from './pages/GuildDashboard';
 import Leaderboard from './pages/Leaderboard';
 import Login from './pages/Login';
 
+// Normalize API URL to ensure it has protocol
+function normalizeApiUrl(url: string): string {
+  if (!url) return 'http://localhost:3001';
+  // If URL doesn't start with http:// or https://, add https://
+  if (!/^https?:\/\//i.test(url)) {
+    return `https://${url}`;
+  }
+  return url;
+}
+
+export const API_URL = normalizeApiUrl(import.meta.env.VITE_API_URL || '');
+
 axios.defaults.withCredentials = true;
-axios.defaults.baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+axios.defaults.baseURL = API_URL;
 
 function App() {
   const [user, setUser] = useState<any>(null);
