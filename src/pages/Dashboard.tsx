@@ -5,14 +5,22 @@ import { Server, Users, LogOut } from 'lucide-react';
 
 export default function Dashboard({ user }: { user: any }) {
   const [guilds, setGuilds] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    setLoading(true);
     axios.get('/api/guilds')
-      .then((res) => setGuilds(Array.isArray(res.data) ? res.data : []))
+      .then((res) => {
+        setGuilds(Array.isArray(res.data) ? res.data : []);
+        setError(null);
+      })
       .catch((err) => {
         console.error('Failed to fetch guilds:', err);
+        setError('Failed to load your servers. Please try again.');
         setGuilds([]);
-      });
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   return (
@@ -46,7 +54,19 @@ export default function Dashboard({ user }: { user: any }) {
       {/* Content */}
       <div className="container mx-auto px-6 py-12">
         <h1 className="text-4xl font-bold mb-8">Your Servers</h1>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        
+        {error && (
+          <div className="bg-discord-red/20 border border-discord-red text-discord-red px-6 py-4 rounded-lg mb-8">
+            {error}
+          </div>
+        )}
+
+        {loading ? (
+          <div className="flex justify-center items-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-discord-blurple"></div>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {guilds.map((guild) => (
             <Link
               key={guild.id}
@@ -74,13 +94,14 @@ export default function Dashboard({ user }: { user: any }) {
               </div>
             </Link>
           ))}
+          {guilds.length === 0 && (
+            <div className="text-center py-20 text-discord-gray col-span-full">
+              <Server className="w-20 h-20 mx-auto mb-4 opacity-50" />
+              <p className="text-xl">No servers found</p>
+              <p className="mt-2">Add the bot to your server to get started</p>
+            </div>
+          )}
         </div>
-        {guilds.length === 0 && (
-          <div className="text-center py-20 text-discord-gray">
-            <Server className="w-20 h-20 mx-auto mb-4 opacity-50" />
-            <p className="text-xl">No servers found</p>
-            <p className="mt-2">Add the bot to your server to get started</p>
-          </div>
         )}
       </div>
     </div>

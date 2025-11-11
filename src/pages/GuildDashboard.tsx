@@ -9,38 +9,36 @@ export default function GuildDashboard({ user }: { user: any }) {
   const [stats, setStats] = useState<any>(null);
   const [activity, setActivity] = useState<any[]>([]);
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!guildId) return;
 
-    // Fetch stats
-    axios.get(`/api/guild/${guildId}/stats`)
-      .then((res) => setStats(res.data))
-      .catch((err) => console.error('Failed to fetch stats:', err));
+    setLoading(true);
 
-    // Fetch activity
-    axios.get(`/api/guild/${guildId}/activity?days=7`)
-      .then((res) => {
-        const data = Array.isArray(res.data) ? res.data : [];
+    // Fetch all data in parallel
+    Promise.all([
+      axios.get(`/api/guild/${guildId}/stats`),
+      axios.get(`/api/guild/${guildId}/activity?days=7`),
+      axios.get(`/api/guild/${guildId}/leaderboard?metric=points&limit=5`)
+    ])
+      .then(([statsRes, activityRes, leaderboardRes]) => {
+        setStats(statsRes.data);
+        
+        const data = Array.isArray(activityRes.data) ? activityRes.data : [];
         const formatted = data.map((d: any) => ({
           date: new Date(d.date).toLocaleDateString(),
           messages: d._sum.messages || 0,
           images: d._sum.images || 0,
         }));
         setActivity(formatted);
+        
+        setLeaderboard(Array.isArray(leaderboardRes.data) ? leaderboardRes.data : []);
       })
       .catch((err) => {
-        console.error('Failed to fetch activity:', err);
-        setActivity([]);
-      });
-
-    // Fetch leaderboard
-    axios.get(`/api/guild/${guildId}/leaderboard?metric=points&limit=5`)
-      .then((res) => setLeaderboard(Array.isArray(res.data) ? res.data : []))
-      .catch((err) => {
-        console.error('Failed to fetch leaderboard:', err);
-        setLeaderboard([]);
-      });
+        console.error('Failed to fetch guild data:', err);
+      })
+      .finally(() => setLoading(false));
   }, [guildId]);
 
   return (
@@ -59,6 +57,12 @@ export default function GuildDashboard({ user }: { user: any }) {
       </nav>
 
       <div className="container mx-auto px-6 py-12">
+        {loading ? (
+          <div className="flex justify-center items-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-discord-blurple"></div>
+          </div>
+        ) : (
+          <>
         {/* Stats Cards */}
         <div className="grid md:grid-cols-3 gap-6 mb-12">
           <StatCard
@@ -137,6 +141,8 @@ export default function GuildDashboard({ user }: { user: any }) {
             View Full Leaderboard
           </Link>
         </div>
+        </>
+        )}
       </div>
     </div>
   );

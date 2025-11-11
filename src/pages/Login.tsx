@@ -12,7 +12,7 @@ export default function Login() {
           Login with Discord to access your dashboard
         </p>
         <a
-          href="http://localhost:3001/auth/discord"
+          href={`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/auth/discord`}
           className="block w-full py-4 bg-discord-blurple hover:bg-discord-blurple/80 rounded-lg text-center font-semibold transition-colors"
         >
           Login with Discord
