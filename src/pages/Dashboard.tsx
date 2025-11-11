@@ -34,7 +34,7 @@ export default function Dashboard({ user }: { user: any }) {
               <span>{user.username}</span>
             </div>
             <a
-              href="http://localhost:3001/auth/logout"
+              href={`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/auth/logout`}
               className="p-2 hover:bg-discord-gray/20 rounded-lg transition-colors"
             >
               <LogOut className="w-5 h-5" />
