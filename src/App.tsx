@@ -1,139 +1,62 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
-import axios, { AxiosRequestConfig } from 'axios';
-import Home from './pages/Home';
-import Dashboard from './pages/Dashboard';
-import GuildDashboard from './pages/GuildDashboard';
-import Leaderboard from './pages/Leaderboard';
-import Login from './pages/Login';
+import { useMemo } from "react";
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { DashboardLayout } from "./components/layout/DashboardLayout";
+import Overview from "./pages/Overview";
+import Analytics from "./pages/Analytics";
+import Team from "./pages/Team";
+import Reinforcements from "./pages/Reinforcements";
+import NotFound from "./pages/NotFound";
+import Login from "./pages/Login";
+import { useAuth } from "@/contexts/AuthContext";
 
-// Normalize API URL to ensure it has protocol
-function normalizeApiUrl(url: string): string {
-  if (!url) return 'http://localhost:3001';
-  // If URL doesn't start with http:// or https://, add https://
-  if (!/^https?:\/\//i.test(url)) {
-    return `https://${url}`;
-  }
-  return url;
-}
-
-export const API_URL = normalizeApiUrl(import.meta.env.VITE_API_URL || '');
-
-axios.defaults.withCredentials = true;
-axios.defaults.baseURL = API_URL;
-axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
-
-let csrfTokenPromise: Promise<void> | null = null;
-
-function ensureCsrfToken(): Promise<void> {
-  if (axios.defaults.headers.common['X-CSRF-Token']) {
-    return Promise.resolve();
-  }
-
-  if (!csrfTokenPromise) {
-    csrfTokenPromise = axios
-      .get('/auth/csrf', { withCredentials: true })
-      .then((res) => {
-        axios.defaults.headers.common['X-CSRF-Token'] = res.data.csrfToken;
-      })
-      .catch((error) => {
-        console.error('Failed to fetch CSRF token', error);
-      })
-      .finally(() => {
-        csrfTokenPromise = null;
-      });
-  }
-
-  return csrfTokenPromise;
-}
-
-axios.interceptors.request.use(async (config) => {
-  const method = config.method?.toLowerCase() ?? 'get';
-  const nonMutatingMethods = ['get', 'head', 'options', 'trace'];
-
-  if (!nonMutatingMethods.includes(method)) {
-    await ensureCsrfToken();
-    config.headers = {
-      ...(config.headers || {}),
-      'X-CSRF-Token': axios.defaults.headers.common['X-CSRF-Token'],
-    };
-  }
-
-  return config;
-});
-
-axios.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    if (error.response?.status === 403 && error.response?.data?.error === 'Invalid CSRF token' && error.config) {
-      const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
-
-      if (originalRequest._retry) {
-        return Promise.reject(error);
-      }
-
-      originalRequest._retry = true;
-      delete axios.defaults.headers.common['X-CSRF-Token'];
-      await ensureCsrfToken();
-
-      originalRequest.headers = {
-        ...(originalRequest.headers || {}),
-        'X-CSRF-Token': axios.defaults.headers.common['X-CSRF-Token'],
-      };
-
-      return axios(originalRequest);
-    }
-
-    return Promise.reject(error);
-  }
+const LoadingScreen = () => (
+  <div className="min-h-screen flex items-center justify-center bg-background">
+    <div className="text-center space-y-3">
+      <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+      <p className="text-muted-foreground text-sm">Preparing your dashboard…</p>
+    </div>
+  </div>
 );
 
-function App() {
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+const App = () => {
+  const { user, isLoading } = useAuth();
 
-  useEffect(() => {
-    ensureCsrfToken();
-  }, []);
+  const isAuthenticated = useMemo(() => Boolean(user), [user]);
 
-  useEffect(() => {
-    // Check if user is authenticated
-    axios
-      .get('/auth/user')
-      .then((res) => setUser(res.data))
-      .catch(() => setUser(null))
-      .finally(() => setLoading(false));
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-discord-black flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
-      </div>
-    );
+  if (isLoading) {
+    return <LoadingScreen />;
   }
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home user={user} />} />
-        <Route path="/login" element={<Login />} />
-        <Route
-          path="/dashboard"
-          element={user ? <Dashboard user={user} /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/dashboard/:guildId"
-          element={user ? <GuildDashboard user={user} /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/dashboard/:guildId/leaderboard"
-          element={user ? <Leaderboard user={user} /> : <Navigate to="/login" />}
-        />
-      </Routes>
-    </BrowserRouter>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <Routes>
+          {isAuthenticated ? (
+            <Route path="/" element={<DashboardLayout />}>
+              <Route index element={<Overview />} />
+              <Route path="reinforcements" element={<Reinforcements />} />
+              <Route path="analytics" element={<Analytics />} />
+              <Route path="team" element={<Team />} />
+            </Route>
+          ) : (
+            <Route path="/" element={<Navigate to="/login" replace />} />
+          )}
+
+          <Route
+            path="/login"
+            element={isAuthenticated ? <Navigate to="/" replace /> : <Login />}
+          />
+
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </BrowserRouter>
+    </TooltipProvider>
   );
-}
+};
 
 export default App;
-
