@@ -38,6 +38,14 @@ const Reinforcements = () => {
 
   const metrics = metricsQuery.data;
   const reinforcements = reinforcementsQuery.data ?? [];
+  const activeQueue = reinforcements.length ?? null;
+  const avgResponseMinutes =
+    typeof metrics?.avgResponseMinutes === "number" ? metrics.avgResponseMinutes : null;
+  const totalCompletedToday =
+    typeof metrics?.totalCompletedToday === "number" ? metrics.totalCompletedToday : null;
+  const highPriorityCount = reinforcements.filter(
+    (item) => item.status === "queued" && (item.priority === "urgent" || item.priority === "high")
+  ).length;
 
   const overdueCount = useMemo(
     () =>
@@ -94,14 +102,16 @@ const Reinforcements = () => {
         <Card className="shadow-card">
           <CardContent className="p-4">
             <p className="text-sm text-muted-foreground mb-1">Active Queue</p>
-            <p className="text-2xl font-bold">{formatNumber(reinforcements.length)}</p>
+            <p className="text-2xl font-bold">
+              {activeQueue !== null ? formatNumber(activeQueue) : "—"}
+            </p>
           </CardContent>
         </Card>
         <Card className="shadow-card">
           <CardContent className="p-4">
             <p className="text-sm text-muted-foreground mb-1">Avg Response</p>
             <p className="text-2xl font-bold">
-              {metrics ? `${metrics.avgResponseMinutes.toFixed(1)}m` : "—"}
+              {avgResponseMinutes !== null ? `${avgResponseMinutes.toFixed(1)}m` : "—"}
             </p>
           </CardContent>
         </Card>
@@ -109,14 +119,16 @@ const Reinforcements = () => {
           <CardContent className="p-4">
             <p className="text-sm text-muted-foreground mb-1">Completed Today</p>
             <p className="text-2xl font-bold text-success">
-              {metrics ? formatNumber(metrics.totalCompletedToday) : "—"}
+              {totalCompletedToday !== null ? formatNumber(totalCompletedToday) : "—"}
             </p>
           </CardContent>
         </Card>
         <Card className="shadow-card">
           <CardContent className="p-4">
             <p className="text-sm text-muted-foreground mb-1">High Priority</p>
-            <p className="text-2xl font-bold text-destructive">{formatNumber(overdueCount)}</p>
+            <p className="text-2xl font-bold text-destructive">
+              {formatNumber(highPriorityCount)}
+            </p>
           </CardContent>
         </Card>
       </div>

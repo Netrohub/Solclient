@@ -12,6 +12,9 @@ export function formatNumber(value: number): string {
   return new Intl.NumberFormat().format(value);
 }
 
-export function formatPercentage(value: number, fractionDigits = 1): string {
+export function formatPercentage(value: number | null | undefined, fractionDigits = 1): string {
+  if (typeof value !== "number" || Number.isNaN(value)) {
+    return "—";
+  }
   return `${value.toFixed(fractionDigits)}%`;
 }

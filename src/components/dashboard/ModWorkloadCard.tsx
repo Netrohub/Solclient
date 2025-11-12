@@ -32,7 +32,7 @@ interface ModWorkloadCardProps {
   /** Number of reinforcements completed today */
   completedToday: number;
   /** Average response time in minutes */
-  avgResponseMinutes: number;
+  avgResponseMinutes?: number | null;
   /** Current online status - shows as colored indicator */
   status: "online" | "away" | "offline";
   /** Performance score 0-100, displayed as progress bar */
@@ -54,12 +54,14 @@ export const ModWorkloadCard = ({
   status,
   responseScore,
 }: ModWorkloadCardProps) => {
-  const responseTimeLabel =
-    avgResponseMinutes <= 0
-      ? "—"
-      : avgResponseMinutes < 1
-      ? `${Math.round(avgResponseMinutes * 60)}s`
-      : `${avgResponseMinutes.toFixed(1)}min`;
+  const hasResponseValue =
+    typeof avgResponseMinutes === "number" && !Number.isNaN(avgResponseMinutes);
+
+  const responseTimeLabel = !hasResponseValue
+    ? "—"
+    : avgResponseMinutes! < 1
+    ? `${Math.round(avgResponseMinutes! * 60)}s`
+    : `${avgResponseMinutes!.toFixed(1)}min`;
 
   return (
     <Card className="shadow-card hover:shadow-hover transition-smooth">
