@@ -77,6 +77,16 @@ const Overview = () => {
   }
 
   const metrics = metricsQuery.data;
+  const activeReinforcements =
+    typeof metrics?.activeReinforcements === "number" ? metrics.activeReinforcements : null;
+  const avgResponseMinutes =
+    typeof metrics?.avgResponseMinutes === "number" ? metrics.avgResponseMinutes : null;
+  const activeAlerts =
+    typeof metrics?.activeAlerts === "number" ? metrics.activeAlerts : null;
+  const completionRate =
+    typeof metrics?.completionRate === "number" ? metrics.completionRate : null;
+  const totalCompletedToday =
+    typeof metrics?.totalCompletedToday === "number" ? metrics.totalCompletedToday : null;
   const guildStats = statsQuery.data;
 
   return (
@@ -104,29 +114,45 @@ const Overview = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
           title="Active Reinforcements"
-          value={metrics ? formatNumber(metrics.activeReinforcements) : "—"}
-          change={metrics ? `${metrics.totalCompletedToday} completed today` : undefined}
+          value={
+            activeReinforcements !== null ? formatNumber(activeReinforcements) : "—"
+          }
+          change={
+            totalCompletedToday !== null
+              ? `${formatNumber(totalCompletedToday)} completed today`
+              : undefined
+          }
           changeType="neutral"
           icon={Activity}
         />
         <MetricCard
           title="Avg Response Time"
-          value={metrics ? `${metrics.avgResponseMinutes.toFixed(1)} min` : "—"}
-          change="Based on active assignments"
+          value={
+            avgResponseMinutes !== null ? `${avgResponseMinutes.toFixed(1)} min` : "—"
+          }
+          change={avgResponseMinutes !== null ? "Based on active assignments" : undefined}
           changeType="positive"
           icon={Clock}
         />
         <MetricCard
           title="Active Alerts"
-          value={metrics ? formatNumber(metrics.activeAlerts) : "—"}
-          change={metrics && metrics.activeAlerts > 0 ? "Needs attention" : "All clear"}
-          changeType={metrics && metrics.activeAlerts > 0 ? "negative" : "positive"}
+          value={activeAlerts !== null ? formatNumber(activeAlerts) : "—"}
+          change={
+            activeAlerts !== null
+              ? activeAlerts > 0
+                ? "Needs attention"
+                : "All clear"
+              : undefined
+          }
+          changeType={
+            activeAlerts !== null && activeAlerts > 0 ? "negative" : "positive"
+          }
           icon={AlertCircle}
         />
         <MetricCard
           title="Completion Rate"
-          value={metrics ? `${metrics.completionRate.toFixed(1)}%` : "—"}
-          change="Resolved warnings vs total"
+          value={completionRate !== null ? `${completionRate.toFixed(1)}%` : "—"}
+          change={completionRate !== null ? "Resolved warnings vs total" : undefined}
           changeType="positive"
           icon={CheckCircle2}
         />
