@@ -3,13 +3,13 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import { DashboardLayout } from "./components/layout/DashboardLayout";
-import Overview from "./pages/Overview";
-import Analytics from "./pages/Analytics";
-import Team from "./pages/Team";
-import Reinforcements from "./pages/Reinforcements";
-import NotFound from "./pages/NotFound";
-import Login from "./pages/Login";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import Overview from "@/pages/Overview";
+import Analytics from "@/pages/Analytics";
+import Team from "@/pages/Team";
+import Reinforcements from "@/pages/Reinforcements";
+import NotFound from "@/pages/NotFound";
+import Login from "@/pages/Login";
 import { useAuth } from "@/contexts/AuthContext";
 
 const LoadingScreen = () => (
