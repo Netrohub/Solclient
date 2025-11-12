@@ -1,7 +1,15 @@
 import axios, { AxiosRequestConfig } from "axios";
 
 function normalizeApiUrl(url: string): string {
-  if (!url) return "http://localhost:3001";
+  if (!url) {
+    if (typeof window !== "undefined" && window.location) {
+      return window.location.origin;
+    }
+    return "";
+  }
+  if (url.startsWith("/")) {
+    return url;
+  }
   if (!/^https?:\/\//i.test(url)) {
     return `https://${url}`;
   }
@@ -11,7 +19,7 @@ function normalizeApiUrl(url: string): string {
 export const API_URL = normalizeApiUrl(import.meta.env.VITE_API_URL || "");
 
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: API_URL || undefined,
   withCredentials: true,
   headers: {
     "X-Requested-With": "XMLHttpRequest",

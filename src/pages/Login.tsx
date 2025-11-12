@@ -38,7 +38,13 @@ const Login = () => {
           className="w-full gradient-primary text-white shadow-lg hover:shadow-primary/40"
           asChild
         >
-          <a href={`${API_URL}/auth/discord`}>
+          <a
+            href={
+              API_URL
+                ? new URL("/auth/discord", API_URL).toString()
+                : "/auth/discord"
+            }
+          >
             Continue with Discord
           </a>
         </Button>
